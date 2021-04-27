@@ -122,15 +122,16 @@ int initialize(listNode** h) {
 
 /* 메모리 해제 */
 int freeList(listNode* h){
+    
+    listNode* p = h->rlink;
 
-    listNode* p = NULL;
-
-    while(h !=NULL)
-    {
-        p = h;
-        h = h->rlink;
-        free(p);
-    }
+	listNode* prev = NULL;
+	while(p != h) {
+		prev = p;
+		p = p->rlink;
+		free(prev);
+	}
+	free(h);
 
 	return 0;
 }
@@ -180,16 +181,16 @@ void printList(listNode* h) {
  */
 int insertLast(listNode* h, int key) {
 
-    listNode* p = h;
+    listNode* p = h->rlink;
     listNode* newNode = (listNode*)malloc(sizeof(listNode));
     newNode->key = key;
 
-    if(p->rlink == h)
+    if(p == h)
     {
-        p->rlink = newNode;
-        p->llink = newNode;
-        newNode->rlink = p;
-        newNode->llink = p;
+        h->rlink = newNode;
+        h->llink = newNode;
+        newNode->rlink = h;
+        newNode->llink = h;
         return 1;
     }
     else
@@ -213,10 +214,11 @@ int insertLast(listNode* h, int key) {
  */
 int deleteLast(listNode* h) {
 
-    listNode* p = h;
-
+    listNode* p = h->rlink;
     if(p->rlink == h)
     {
+        h->rlink = h;
+        h->llink = h;
         free(p);
         return 1;
     }
@@ -224,13 +226,17 @@ int deleteLast(listNode* h) {
     {
         while(p->rlink != h)
         {
-          p = p->rlink;
+            p = p->rlink;
         }
-        p->llink->rlink = h;
-        p->rlink->llink = h->llink;
+        if(p->rlink == h)
+        {
+            p->llink->rlink = h;
+            h->llink = p->llink;
+            free(p);
+            return 1;
+        }
     }
    
-    free(p);
 
 	return 1;
 }
@@ -241,26 +247,25 @@ int deleteLast(listNode* h) {
  */
 int insertFirst(listNode* h, int key) {
 
-    listNode* p = h;
+    listNode* p = h->rlink;
     listNode* newNode = (listNode*)malloc(sizeof(listNode));
     newNode->key = key;
 
-    if(p->rlink == h)
+    if(p == h)
     {
-        p->rlink = newNode;
-        p->llink = newNode;
-        newNode->rlink = p;
-        newNode->llink = p;
+        h->rlink = newNode;
+        h->llink = newNode;
+        newNode->rlink = h;
+        newNode->llink = h;
         return 1;
     }
     else
     {
-        newNode->llink = p;
-        newNode->rlink = p->rlink;
-        p->rlink->llink = newNode;
-        p->rlink = newNode;
+        newNode->rlink = p;
+        newNode->llink = h;
+        p->llink = newNode;
+        h->rlink = newNode;
     }
-
 	return 1;
 }
 
@@ -269,10 +274,12 @@ int insertFirst(listNode* h, int key) {
  */
 int deleteFirst(listNode* h) {
 
-    listNode* p = h;
+    listNode* p = h->rlink;
 
     if(p->rlink == h)
     {
+        h->rlink = h;
+        h->llink = h;
         free(p);
         return 1;
     }
@@ -293,6 +300,23 @@ int deleteFirst(listNode* h) {
  */
 int invertList(listNode* h) {
 
+    listNode *middle; //중간 노드
+	listNode *trail; //뒤 노드
+	listNode *lead; //앞 노드
+
+	lead = h->rlink; //h의first를 lead에 불러온다
+	middle = lead->llink; //middle를 NULL로 설정한다
+
+	while(lead != h) //lead가 NULL일때 반복문 탈출
+	{
+		trail = middle; //trail을 중간노드로 둔다
+		middle = lead; //중간 노드는 앞의 노드로 바꾼다
+		lead = lead->rlink; //앞 노드는 앞노드의 rlink를 타고 다음노드로 간다
+		middle->rlink = trail; //중간노드의 rlink는 trail로 바꿈으로서 rlink를 역순으로 설정
+		middle->llink = lead; //중간노드의 llink는 lead로 바꿈으로서 llink를 역순으로 설정
+	}
+
+	h->rlink = middle; //lead는 NULL로 바뀌었기 때문에 첫번째 노드는 lead의 이전 노드인 middle로 설정한다.
 
 	return 0;
 }
@@ -304,7 +328,7 @@ int invertList(listNode* h) {
  **/
 int insertNode(listNode* h, int key) {
 
-    listNode* p = h;
+    listNode* p = h->rlink;
     listNode* newNode = (listNode*)malloc(sizeof(listNode));
     newNode->key = key;
 
@@ -314,6 +338,7 @@ int insertNode(listNode* h, int key) {
         newNode->llink = p->llink;
         p->llink->rlink = newNode;
         p->llink = newNode;
+        h = newNode;
         return 0;
     }
     else
@@ -349,16 +374,18 @@ int insertNode(listNode* h, int key) {
  */
 int deleteNode(listNode* h, int key) {
 
-    listNode* p = h;
+    listNode* p = h->rlink;
 
-    if(h->key == key)
+    if(p->key == key)
     {
+        p->rlink->llink = p->llink;
+        p->llink->rlink = p->rlink;
         free(h);
         return 0;
     }
     else
-    {
-        while(p->rlink != h&& p->key == key)
+    {  
+        while(p->rlink != h&& p->key != key)
         {
             p = p->rlink;
         }
@@ -370,9 +397,8 @@ int deleteNode(listNode* h, int key) {
         {
             p->rlink->llink = p->llink;
             p->llink->rlink = p->rlink;
-            free(p);
-            return 0;
         }
+        free(p);
     }
 
 	return 0;
