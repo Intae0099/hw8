@@ -123,15 +123,15 @@ int initialize(listNode** h) {
 /* 메모리 해제 */
 int freeList(listNode* h){
     
-    listNode* p = h->rlink;
+    listNode* p = h->rlink; //임시노드인 p를 h의 rlink를 통해 첫 노드로 이동
 
-	listNode* prev = NULL;
-	while(p != h) {
-		prev = p;
-		p = p->rlink;
-		free(prev);
+	listNode* prev = NULL; //전노드를 NULL로 설정
+	while(p != h) { //p가 h가 아닐경우 반복
+		prev = p; //전노드로 p를로 설정
+		p = p->rlink; //p를 다음노드로 이동
+		free(prev); //전노드를 동적할당 해제를 통해 삭제
 	}
-	free(h);
+	free(h); //헤드노드를 동적할당을 통해 삭제
 
 	return 0;
 }
@@ -181,28 +181,28 @@ void printList(listNode* h) {
  */
 int insertLast(listNode* h, int key) {
 
-    listNode* p = h->rlink;
-    listNode* newNode = (listNode*)malloc(sizeof(listNode));
-    newNode->key = key;
+    listNode* p = h->rlink; //h의 rlink를 통해 첫번째 노드를 p로 설정
+    listNode* newNode = (listNode*)malloc(sizeof(listNode)); //newNode를 새노드를 동적할당한다
+    newNode->key = key; //새노드의 값을 key로 설정
 
-    if(p == h)
+    if(p == h) //h의 rlink가 h자신을 가르킬때
     {
-        h->rlink = newNode;
-        h->llink = newNode;
-        newNode->rlink = h;
-        newNode->llink = h;
+        h->rlink = newNode; //첫번째 노드를 newNode로 설정
+        h->llink = newNode; //헤드노드의 전 노들로 newNode로 설정
+        newNode->rlink = h; //newNode의 rlink를 h로 설정
+        newNode->llink = h; //newNode의 llink를 h로 설정
         return 1;
     }
-    else
+    else //그렇지 않을 경우
     {
-        while(p->rlink != h)
+        while(p->rlink != h) //p의 rlink가 h가 아닐경우 반복
         {
-            p = p->rlink;
+            p = p->rlink; //p를 rlink를 통해 다음노드로 이동
         }
-        p->rlink = newNode;
-        newNode->llink = p;
-        newNode->rlink = h;
-        h->llink = newNode;
+        p->rlink = newNode; //p의 rlink를 newNode로 설정
+        newNode->llink = p; //newNode의 llink를 p로 설정
+        newNode->rlink = h; //마지막 노드의 다음노드는 h로 가르켜야 하므로 newNode의 rlink를 h로 설정
+        h->llink = newNode; //h노드의 llink를 newNode로 설정
     }
     
 	return 1;
@@ -214,30 +214,29 @@ int insertLast(listNode* h, int key) {
  */
 int deleteLast(listNode* h) {
 
-    listNode* p = h->rlink;
-    if(p->rlink == h)
+    listNode* p = h->rlink; //h노드의 rlink를 통해 첫노드를 p로 설정
+    if(p->rlink == h && p->llink == h) //p의 rlink와 p의 llink가 h노드인 경우 즉 첫번째 노드일 경우
     {
-        h->rlink = h;
-        h->llink = h;
-        free(p);
+        h->rlink = h; //h의 rlink를 h로 지정
+        h->llink = h; //h의 llink를 h로 지정
+        free(p); //p노드를 동적할당 해제를 통해 삭제
         return 1;
     }
-    else
+    else //그렇지 않을 경우
     {
-        while(p->rlink != h)
+        while(p->rlink != h) //p의rlink가 h노드가 아닐경우 반복한다
         {
-            p = p->rlink;
+            p = p->rlink; //p를 p의 rlink로 설정함으로서 다음노드로 이동
         }
-        if(p->rlink == h)
+        if(p->rlink == h) //p의 rlink가 h일 경우 즉 마지막 노드일 경우
         {
-            p->llink->rlink = h;
-            h->llink = p->llink;
-            free(p);
+            p->llink->rlink = h; //p의 rlink의 rlink를 h로 설정 즉 마지막 노드의 전노드의 rlink를 h로 설정
+            h->llink = p->llink; //h노드의 llink를 p의 전노드로 설정
+            free(p); //p노드 동적할당 해제를 통해 삭제
             return 1;
         }
     }
    
-
 	return 1;
 }
 
@@ -247,24 +246,25 @@ int deleteLast(listNode* h) {
  */
 int insertFirst(listNode* h, int key) {
 
-    listNode* p = h->rlink;
-    listNode* newNode = (listNode*)malloc(sizeof(listNode));
-    newNode->key = key;
+    listNode* p = h->rlink; //h노드의 rlink를 통해 첫노드를 p로 설정
+    listNode* newNode = (listNode*)malloc(sizeof(listNode)); //newNode를 새노드를 동적할당한다
+    newNode->key = key; //새노드의 값을 key로 설정
 
-    if(p == h)
+
+    if(p == h) //p노드가 h일 경우 즉 첫번째 노드일 경우
     {
-        h->rlink = newNode;
-        h->llink = newNode;
-        newNode->rlink = h;
-        newNode->llink = h;
+        h->rlink = newNode; //h의 rlink를 newNode로 설정
+        h->llink = newNode; //h의 rlink를 newNode로 설정
+        newNode->rlink = h; //newNode의 rlink를 h로 설정
+        newNode->llink = h; //newNode의 llink를 h로 설정
         return 1;
     }
-    else
+    else //그렇지 않을 경우
     {
-        newNode->rlink = p;
-        newNode->llink = h;
-        p->llink = newNode;
-        h->rlink = newNode;
+        newNode->rlink = p; //newNode의 rlink를 p로 설정
+        newNode->llink = h; //newNode의 llink를 h로 설정
+        p->llink = newNode; //p의 llink를 newNode로 설정
+        h->rlink = newNode; //h의 rlink를 newNode로 설정
     }
 	return 1;
 }
@@ -274,20 +274,20 @@ int insertFirst(listNode* h, int key) {
  */
 int deleteFirst(listNode* h) {
 
-    listNode* p = h->rlink;
+    listNode* p = h->rlink; //h노드의 rlink를 통해 첫노드를 p로 설정
 
-    if(p->rlink == h)
+    if(p->rlink == h) //p의 rlink가 h일 경우 즉 첫 노드일 경우
     {
-        h->rlink = h;
-        h->llink = h;
-        free(p);
-        return 1;
+        h->rlink = h; //h의 rlink를 h로 설정
+        h->llink = h; //h의 llink를 h로 설정
+        free(p); //p노드 동적할당 해제를 통해 첫번째 노드 삭제
+        return 1; //1리턴을 통해 함수종료
     }
-    else
+    else //그렇지 않을 경우
     {
-        p->rlink->llink = p->llink;
-        p->llink->rlink = p->rlink;
-        free(p);
+        p->rlink->llink = p->llink; //p의 다음노드의 llink를 p의 전노드로 설정
+        p->llink->rlink = p->rlink; //p의 전노드의 rlink를 p의 다음노드로 설정
+        free(p); //p노드 동적할당 해제를 통해 첫번째 노드 삭제
     }
 
 	return 1;
@@ -328,40 +328,39 @@ int invertList(listNode* h) {
  **/
 int insertNode(listNode* h, int key) {
 
-    listNode* p = h->rlink;
-    listNode* newNode = (listNode*)malloc(sizeof(listNode));
-    newNode->key = key;
+    listNode* p = h->rlink; //h노드의 rlink를 통해 첫노드를 p로 설정
+    listNode* newNode = (listNode*)malloc(sizeof(listNode)); //newNode를 새노드를 동적할당한다
+    newNode->key = key; //새노드의 값을 key로 설정
 
-    if(p->key > key)
+    if(p->key > key) //p노드안의 값이 key보다 클경우
     {
-        newNode->rlink = p;
-        newNode->llink = p->llink;
-        p->llink->rlink = newNode;
-        p->llink = newNode;
-        h = newNode;
-        return 0;
+        newNode->rlink = p; //newNode의 rlink를 p로 설정
+        newNode->llink = p->llink; //newNode의 llink를 p의 전노드로 설정
+        p->llink->rlink = newNode; //p의 전노드의 rllink를 newNode로 설정
+        p->llink = newNode; //p의 llink를 newNode로 설정
+        return 0; //0리턴을 통해 함수 종료
     }
-    else
+    else //그렇지 않을경우
     {
-        while(p->rlink != h && p->key < key)
+        while(p->rlink != h && p->key < key) //p의 rlink가 h가 아닐경우와 p노드안의 값이 key보다 작을 경우
         {
-            p = p->rlink;
+            p = p->rlink; //p를 다음노드로 이동
         }
-        if(p->rlink == h)
+        if(p->rlink == h) //p의 rlink가 h일 경우 즉 마지막 노드일 경우
         {
-            newNode->llink = p;
-            newNode->rlink = h;
-            p->rlink = newNode;
-            h->llink = newNode;
+            newNode->llink = p; //newNode의 llink를 p로 설정
+            newNode->rlink = h; //newNode의 rlink를 h로 설정
+            p->rlink = newNode; //p의 rlink를 newNode로 설정
+            h->llink = newNode; //h의 llink를 newNode로 설정
             return 0;
         }
-        else
+        else //그렇지 않을 경우
         {
-            newNode->rlink = p;
-            newNode->llink = p->llink;
-            p->llink->rlink = newNode;
-            p->llink = newNode;
-            return 0;
+            newNode->rlink = p; //newNode의 rlink를 p로 설정
+            newNode->llink = p->llink; //newNode의 llink를 p의 전노드로 설정
+            p->llink->rlink = newNode; //p의 전노드의 rlink를 newNode로 설정
+            p->llink = newNode; //p의 llink를 newNode로 설정
+            return 0; //0을 리턴해줌으로서 함수 종료
         }
     }
 
@@ -374,33 +373,32 @@ int insertNode(listNode* h, int key) {
  */
 int deleteNode(listNode* h, int key) {
 
-    listNode* p = h->rlink;
+    listNode* p = h->rlink; //h노드의 rlink를 통해 첫노드를 p로 설정
 
-    if(p->key == key)
+    if(p->key == key) //p안에 값이 key일 경우 즉 첫번째 노드가 삭제할 노드일 경우
     {
-        p->rlink->llink = p->llink;
-        p->llink->rlink = p->rlink;
-        free(h);
+        p->rlink->llink = p->llink; //p의 다음노드의 llink를 p의 전노드로 설정
+        p->llink->rlink = p->rlink; //p의 전노드의 rlink를 p의 다음노드로 설정
+        free(p); //p노드 동적할당 해제를 통해 첫번째 노드 삭제
         return 0;
     }
-    else
+    else //그렇지 않을 경우
     {  
-        while(p->rlink != h&& p->key != key)
+        while(p->rlink != h&& p->key != key) //p의 rlink가 h가 아닐경우와 p노드 안의 값이 key가 아닌경우
         {
-            p = p->rlink;
+            p = p->rlink; //p를 다음노드로 이동
         }
-        if(p->key !=key && p->rlink == h)
+        if(p->key !=key && p->rlink == h) //p노드안의 값이 key가 아닐경우와 p의 rlink가 h일 경우 즉 오류
         {
-            return 0;
+            return 0; //0을 리턴해줌으로서 함수 종료
         }
-        else if(p->key == key)
+        else if(p->key == key) //p노드안의 값이 key일경우
         {
-            p->rlink->llink = p->llink;
-            p->llink->rlink = p->rlink;
+            p->rlink->llink = p->llink; //p의 다음노드의 llink를 p의 전노드로 설정
+            p->llink->rlink = p->rlink; //p의 전노드의 rlink를 p의 다음노드로 설정
         }
-        free(p);
+        free(p);//p노드 동적할당 해제를 통해 첫번째 노드 삭제
     }
-
 	return 0;
 }
 
